@@ -8,6 +8,7 @@
 #include "Adafruit_MS_PWMServoDriver.h"   //调用库文件Adafruit_MS_PWMServoDriver，这个是舵机扩展板PWM驱动库
 #include "PS2X_lib.h"                     //调用库文件PS2X_lib，这个是无线手柄库
 #include "BTJoystick.h"                   //调用库文件BTJoystick，这个是蓝牙app摇杆库
+//#include "Adafruit_Encoder.h"             //调用库文件
 
 #define PS2_SEL 10  //定义PS2手柄引脚10
 #define PS2_CMD 11  //定义PS2手柄引脚11
@@ -26,6 +27,9 @@ byte type = 0;      //定义变量形式
 byte vibrate = 0;   //定义变量震动
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();  //定义舵机扩展板主名称
+Adafruit_DCMotor *DCMotor1 = AFMS.getMotor(1);  //DC电机
+Adafruit_DCMotor *DCMotor2 = AFMS.getMotor(2);  //DC电机
+//Adafruit_Encoder Encoder1(1); //创建1号编码器（对于M1电机）
 
 const int SERVOS = 4;       //定义变量SERVOS,表示舵机数，预先赋值4
 const int ACC = 10;         //定义变量ACC，用于消除电位器误差
@@ -90,6 +94,7 @@ void writeServo( uint8_t n, uint8_t angle )  //n:舵机号； angle：舵机需�
     setServoPulse( n, pulse );  //让指定的舵机通过相对应的脉冲时间转到指定的角度
 }
 
+
 void setup()
 {
     Serial.begin( 57600 );  //串口通讯波特率57600
@@ -148,6 +153,8 @@ void setup()
         currentAngle[i] = INITANGLE[i];
         writeServo( PIN[i], INITANGLE[i] );
     }
+
+    // 初始化地盘电机
 }
 
 void loop()
@@ -169,6 +176,27 @@ void loop()
         Autodelete();         //删除记录点位，函数所在416行
         PCmode();             //PC控制模式，函数所在439行
 
+        //电机控制
+        if (ps2x.Button(PSB_TRIANGLE)) {//前进
+          DCMotor1->setSpeed(100);
+          DCMotor2->setSpeed(100);
+          DCMotor1->run(FORWARD); 
+          DCMotor2->run(FORWARD); 
+        }else if (ps2x.Button(PSB_SQUARE)) {//左转
+          DCMotor1->setSpeed(10);
+          DCMotor2->setSpeed(100);
+          DCMotor1->run(FORWARD); 
+          DCMotor2->run(FORWARD); 
+        }else if (ps2x.Button(PSB_CIRCLE)) {//右转
+          DCMotor1->setSpeed(100);
+          DCMotor2->setSpeed(10);
+          DCMotor1->run(FORWARD); 
+          DCMotor2->run(FORWARD); 
+        }else if(ps2x.Button(PSB_CROSS)){ //停止电机
+          DCMotor1->run(BRAKE); 
+          DCMotor2->run(BRAKE); 
+        }
+
     delay( 10 );
 }
 
@@ -177,12 +205,12 @@ void init_Pins(){  //函数1：舵机初始化参数函数
     PIN[0] = 0;  //爪头舵机对应舵机板插口号
     MIN[0] = 0;  //爪头舵机最小角度限位
     MAX[0] = 180;  //爪头舵机最大角度限位
-    INITANGLE[0] = 78;  //爪头舵机原点角度
+    INITANGLE[0] = 80;  //78;  //爪头舵机原点角度
     /*01:小臂舵机参数*/
     PIN[1] = 1;  //小臂舵机对应舵机板插口号
     MIN[1] = 45;  //小臂舵机最小角度限位
     MAX[1] = 105;  //小臂舵机最大角度限位
-    INITANGLE[1] = 90;  //爪头舵机原点角度
+    INITANGLE[1] = 90;  //小臂舵机原点角度
     /*02:大臂舵机参数*/
     PIN[2] = 2;  //大臂舵机对应舵机板插口号
     MIN[2] = 40;  //大臂舵机最小角度限位
