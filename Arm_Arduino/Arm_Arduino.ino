@@ -29,6 +29,7 @@ byte vibrate = 0;   //定义变量震动
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();  //定义舵机扩展板主名称
 Adafruit_DCMotor *DCMotor1 = AFMS.getMotor(1);  //DC电机
 Adafruit_DCMotor *DCMotor2 = AFMS.getMotor(2);  //DC电机
+Adafruit_DCMotor *DCMotor3 = AFMS.getMotor(3);  //DC电机
 //Adafruit_Encoder Encoder1(1); //创建1号编码器（对于M1电机）
 
 const int SERVOS = 4;       //定义变量SERVOS,表示舵机数，预先赋值4
@@ -180,8 +181,10 @@ void loop()
         if (ps2x.Button(PSB_TRIANGLE)) {//前进
           DCMotor1->setSpeed(100);
           DCMotor2->setSpeed(100);
+          DCMotor3->setSpeed(20);
           DCMotor1->run(FORWARD); 
           DCMotor2->run(FORWARD); 
+          DCMotor3->run(FORWARD);
         }else if (ps2x.Button(PSB_SQUARE)) {//左转
           DCMotor1->setSpeed(10);
           DCMotor2->setSpeed(100);
@@ -194,7 +197,8 @@ void loop()
           DCMotor2->run(FORWARD); 
         }else if(ps2x.Button(PSB_CROSS)){ //停止电机
           DCMotor1->run(BRAKE); 
-          DCMotor2->run(BRAKE); 
+          DCMotor2->run(BRAKE);
+          DCMotor3->run(BRAKE); 
         }
 
     delay( 10 );
